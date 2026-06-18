@@ -1,0 +1,64 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and release
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [darwin, linux]
+        goarch: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+
+      - name: Set build variables
+        run: |
+          echo "VERSION=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_ENV"
+          echo "COMMIT=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+          echo "BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          go build \
+            -ldflags "-s -w \
+              -X github.com/Malong11-007/web-search-mcp/internal/version.Version=v$VERSION \
+              -X github.com/Malong11-007/web-search-mcp/internal/version.Commit=$COMMIT \
+              -X github.com/Malong11-007/web-search-mcp/internal/version.BuildDate=$BUILD_DATE" \
+            -o web-search-mcp \
+            ./cmd/web-search-mcp/
+
+      - name: Package
+        run: |
+          ARCHIVE="web-search-mcp_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz"
+          tar -czf "$ARCHIVE" web-search-mcp
+          sha256sum "$ARCHIVE" > "$ARCHIVE.sha256"
+          echo "ARCHIVE=$ARCHIVE" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-search-mcp_${{ matrix.goos }}_${{ matrix.goarch }}
+          path: |
+            web-search-mcp_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz
+            web-search-mcp_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz.sha256
+
+      - name: Upload to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            web-search-mcp_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz
+            web-search-mcp_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz.sha256
+          generate_release_notes: true

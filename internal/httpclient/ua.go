@@ -35,7 +35,6 @@ func browserHeaders(ua string) map[string]string {
 		"User-Agent":      ua,
 		"Accept":          "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
 		"Accept-Language": "en-US,en;q=0.9",
-		"Accept-Encoding": "gzip, deflate",
 		"Sec-Fetch-Dest":  "document",
 		"Sec-Fetch-Mode":  "navigate",
 		"Sec-Fetch-Site":  "none",

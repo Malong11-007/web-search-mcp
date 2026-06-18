@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/Malong11-007/web-search-mcp/internal/httpclient"
@@ -33,6 +34,22 @@ func (d *DuckDuckGo) Search(ctx context.Context, query string, numResults int) (
 		return nil, fmt.Errorf("duckduckgo: request failed: %w", err)
 	}
 	defer resp.Body.Close()
+
+	// DuckDuckGo returns 202 when rate-limited; wait and retry once.
+	if resp.StatusCode == http.StatusAccepted {
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		case <-time.After(2 * time.Second):
+		}
+		resp2, err := d.client.GetSimple(searchURL)
+		if err != nil {
+			return nil, fmt.Errorf("duckduckgo: retry request failed: %w", err)
+		}
+		resp.Body.Close()
+		resp = resp2
+		defer resp.Body.Close()
+	}
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("duckduckgo: unexpected status %d", resp.StatusCode)

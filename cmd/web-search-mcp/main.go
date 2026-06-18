@@ -15,16 +15,23 @@ import (
 	"github.com/Malong11-007/web-search-mcp/internal/research"
 	"github.com/Malong11-007/web-search-mcp/internal/scrape"
 	"github.com/Malong11-007/web-search-mcp/internal/search"
+	"github.com/Malong11-007/web-search-mcp/internal/version"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 )
 
 func main() {
+	// Handle --version / -v before starting the server.
+	if len(os.Args) > 1 && (os.Args[1] == "--version" || os.Args[1] == "-v") {
+		fmt.Println(version.String())
+		os.Exit(0)
+	}
+
 	cfg := config.Load()
 
 	s := server.NewMCPServer(
 		"web-search-mcp",
-		"0.2.0",
+		version.Short(),
 		server.WithToolCapabilities(true),
 	)
 
