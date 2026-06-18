@@ -27,12 +27,8 @@ func (d *DuckDuckGo) Search(ctx context.Context, query string, numResults int) (
 		url.QueryEscape(query),
 	)
 
-	req, err := http.NewRequestWithContext(ctx, "GET", searchURL, nil)
-	if err != nil {
-		return nil, fmt.Errorf("duckduckgo: build request: %w", err)
-	}
-
-	resp, err := d.client.Do(req)
+	// Use simple GET — search APIs don't need browser emulation headers.
+	resp, err := d.client.GetSimple(searchURL)
 	if err != nil {
 		return nil, fmt.Errorf("duckduckgo: request failed: %w", err)
 	}

@@ -41,12 +41,8 @@ func (s *SearXNG) Search(ctx context.Context, query string, numResults int) ([]R
 		url.QueryEscape(query),
 	)
 
-	req, err := http.NewRequestWithContext(ctx, "GET", searchURL, nil)
-	if err != nil {
-		return nil, fmt.Errorf("searxng: build request: %w", err)
-	}
-
-	resp, err := s.client.Do(req)
+	// Use simple GET — search APIs don't need browser emulation headers.
+	resp, err := s.client.GetSimple(searchURL)
 	if err != nil {
 		return nil, fmt.Errorf("searxng: request failed: %w", err)
 	}

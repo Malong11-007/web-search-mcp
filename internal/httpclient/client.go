@@ -54,6 +54,22 @@ func New(cfg *config.Config) *Client {
 	return c
 }
 
+// GetSimple performs a GET request with only User-Agent set (no stealth headers).
+// Use this for search APIs and other endpoints that don't need browser emulation.
+func (c *Client) GetSimple(targetURL string) (*http.Response, error) {
+	req, err := http.NewRequest("GET", targetURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	ua := c.ua
+	if ua == "" {
+		ua = rotateUA()
+	}
+	req.Header.Set("User-Agent", ua)
+	c.lastURL = targetURL
+	return c.http.Do(req)
+}
+
 // Get performs a GET request with stealth headers.
 // The caller is responsible for closing resp.Body.
 func (c *Client) Get(targetURL string) (*http.Response, error) {
