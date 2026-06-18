@@ -41,7 +41,7 @@ detect_platform() {
 install_via_go() {
     if command -v go &>/dev/null; then
         info "Go detected — installing via go install..."
-        go install "github.com/${REPO}/cmd/server@${VERSION}"
+        go install "github.com/${REPO}/cmd/web-search-mcp@${VERSION}"
         local bin_dir
         bin_dir="$(go env GOPATH)/bin"
         if [ -x "${bin_dir}/${BINARY}" ]; then
@@ -72,7 +72,7 @@ install_via_release() {
 
     if ! curl -fsSL "$url" -o "${tmpdir}/${archive}"; then
         err "Download failed. The release may not exist yet."
-        err "Try building from source: git clone https://github.com/${REPO}.git && cd web-search-mcp && go build -o ${BINARY} ./cmd/server/"
+        err "Try building from source: git clone https://github.com/${REPO}.git && cd web-search-mcp && go build -o ${BINARY} ./cmd/web-search-mcp/"
         return 1
     fi
 
@@ -102,7 +102,7 @@ install_from_source() {
 
     git clone "https://github.com/${REPO}.git" "$tmpdir"
     cd "$tmpdir"
-    go build -o "$BINARY" ./cmd/server/
+    go build -o "$BINARY" ./cmd/web-search-mcp/
 
     local install_dir="${HOME}/.local/bin"
     mkdir -p "$install_dir"

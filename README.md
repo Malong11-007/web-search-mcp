@@ -19,7 +19,7 @@ Claude Code and Copilot have built-in web search — but they only return titles
 ### Option 1: Go install (if you have Go)
 
 ```bash
-go install github.com/Malong11-007/web-search-mcp/cmd/server@latest
+go install github.com/Malong11-007/web-search-mcp/cmd/web-search-mcp@latest
 ```
 
 ### Option 2: One-liner (curl)
@@ -37,7 +37,7 @@ Download the binary for your platform from [GitHub Releases](https://github.com/
 ```bash
 git clone git@github.com:Malong11-007/web-search-mcp.git
 cd web-search-mcp
-go build -o web-search-mcp ./cmd/server/
+go build -o web-search-mcp ./cmd/web-search-mcp/
 ```
 
 ## Configure Claude Code
@@ -205,7 +205,7 @@ This won't beat IP-based blocking (you need a proxy network for that), but it de
 ## Architecture
 
 ```
-cmd/server/main.go          Entrypoint: tool registration, stdio/HTTP+SSE
+cmd/web-search-mcp/main.go          Entrypoint: tool registration, stdio/HTTP+SSE
 internal/
   ├── async/job.go          Background job manager (create/poll/reap)
   ├── config/config.go      16 env vars, tool group filtering

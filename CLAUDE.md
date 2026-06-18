@@ -10,10 +10,10 @@ A Go MCP (Model Context Protocol) server that provides web search, content extra
 
 ```bash
 # Build the server binary
-go build -o web-search-mcp ./cmd/server/
+go build -o web-search-mcp ./cmd/web-search-mcp/
 
 # Run the server (stdio transport, for Claude Desktop / MCP clients)
-go run ./cmd/server/
+go run ./cmd/web-search-mcp/
 
 # Run all tests
 go test ./...
@@ -39,7 +39,7 @@ go generate ./...
 ### Transport Layer
 - The server supports **stdio** (default, for local MCP clients like Claude Desktop) and **HTTP/SSE** (for remote client connections).
 - stdio transport is handled by the `mcp-go` library's `server.ServeStdio` or equivalent.
-- The main entrypoint is in `cmd/server/main.go` — it wires together all tool registrations and starts the transport.
+- The main entrypoint is in `cmd/web-search-mcp/main.go` — it wires together all tool registrations and starts the transport.
 
 ### Tool Registration Pattern
 Each tool group (search, scrape, crawl, etc.) lives in its own package under `internal/` and exposes a registration function:
@@ -51,7 +51,7 @@ func RegisterTool(s *mcp.Server) {
 }
 ```
 
-All tool groups are registered in `cmd/server/main.go` by calling each package's `Register*` function. This keeps tool definitions co-located with their handlers and dependencies.
+All tool groups are registered in `cmd/web-search-mcp/main.go` by calling each package's `Register*` function. This keeps tool definitions co-located with their handlers and dependencies.
 
 ### Key Packages
 
