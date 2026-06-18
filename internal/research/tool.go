@@ -28,7 +28,9 @@ func RegisterTool(s *server.MCPServer, cfg *config.Config) {
 		case "duckduckgo":
 			backends = append(backends, search.NewDuckDuckGo(client))
 		case "searxng":
-			backends = append(backends, search.NewSearXNG(client, cfg))
+			if cfg.SearXNGURL != "" {
+				backends = append(backends, search.NewSearXNG(client, cfg))
+			}
 		}
 	}
 	if len(backends) == 0 {

@@ -52,7 +52,7 @@ type Config struct {
 // Load reads configuration from environment variables, applying defaults.
 func Load() *Config {
 	return &Config{
-		SearXNGURL:     envStr("SEARXNG_URL", "https://searx.be"),
+		SearXNGURL: envStr("SEARXNG_URL", ""),
 		SearXNGTimeout: envDuration("SEARXNG_TIMEOUT", 10*time.Second),
 
 		SearchBackends: envStrSlice("SEARCH_BACKENDS", []string{"duckduckgo", "searxng"}),

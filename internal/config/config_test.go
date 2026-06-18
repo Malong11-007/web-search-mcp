@@ -18,8 +18,8 @@ func TestLoad_Defaults(t *testing.T) {
 
 	cfg := Load()
 
-	if cfg.SearXNGURL != "https://searx.be" {
-		t.Errorf("SearXNGURL = %q, want %q", cfg.SearXNGURL, "https://searx.be")
+	if cfg.SearXNGURL != "" {
+		t.Errorf("SearXNGURL = %q, want %q (empty — opt-in)", cfg.SearXNGURL, "")
 	}
 	if cfg.HTTPTimeout != 30*time.Second {
 		t.Errorf("HTTPTimeout = %v, want 30s", cfg.HTTPTimeout)

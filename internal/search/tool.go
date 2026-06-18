@@ -22,7 +22,9 @@ func buildBackend(cfg *config.Config) Backend {
 		case "duckduckgo":
 			backends = append(backends, NewDuckDuckGo(client))
 		case "searxng":
-			backends = append(backends, NewSearXNG(client, cfg))
+			if cfg.SearXNGURL != "" {
+				backends = append(backends, NewSearXNG(client, cfg))
+			}
 		}
 	}
 	if len(backends) == 0 {
