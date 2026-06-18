@@ -9,12 +9,12 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/dan/web-search-mcp/internal/config"
-	"github.com/dan/web-search-mcp/internal/crawl"
-	sitemap "github.com/dan/web-search-mcp/internal/map"
-	"github.com/dan/web-search-mcp/internal/research"
-	"github.com/dan/web-search-mcp/internal/scrape"
-	"github.com/dan/web-search-mcp/internal/search"
+	"github.com/Malong11-007/web-search-mcp/internal/config"
+	"github.com/Malong11-007/web-search-mcp/internal/crawl"
+	sitemap "github.com/Malong11-007/web-search-mcp/internal/map"
+	"github.com/Malong11-007/web-search-mcp/internal/research"
+	"github.com/Malong11-007/web-search-mcp/internal/scrape"
+	"github.com/Malong11-007/web-search-mcp/internal/search"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 )

@@ -9,9 +9,9 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 
-	"github.com/dan/web-search-mcp/internal/config"
-	"github.com/dan/web-search-mcp/internal/httpclient"
-	"github.com/dan/web-search-mcp/internal/ratelimit"
+	"github.com/Malong11-007/web-search-mcp/internal/config"
+	"github.com/Malong11-007/web-search-mcp/internal/httpclient"
+	"github.com/Malong11-007/web-search-mcp/internal/ratelimit"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 )

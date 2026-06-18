@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/dan/web-search-mcp/internal/config"
+	"github.com/Malong11-007/web-search-mcp/internal/config"
 )
 
 // Client wraps net/http.Client with stealth anti-blocking features:

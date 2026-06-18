@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dan/web-search-mcp/internal/httpclient"
+	"github.com/Malong11-007/web-search-mcp/internal/httpclient"
 )
 
 // Rule represents a single robots.txt rule.

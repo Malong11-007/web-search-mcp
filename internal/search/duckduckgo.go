@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/dan/web-search-mcp/internal/httpclient"
+	"github.com/Malong11-007/web-search-mcp/internal/httpclient"
 )
 
 // DuckDuckGo searches via DuckDuckGo's HTML interface.

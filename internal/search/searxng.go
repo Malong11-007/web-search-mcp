@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/dan/web-search-mcp/internal/config"
-	"github.com/dan/web-search-mcp/internal/httpclient"
+	"github.com/Malong11-007/web-search-mcp/internal/config"
+	"github.com/Malong11-007/web-search-mcp/internal/httpclient"
 )
 
 // SearXNG searches via a SearXNG instance's JSON API.
