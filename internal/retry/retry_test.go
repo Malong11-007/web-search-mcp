@@ -65,6 +65,67 @@ func TestDo_ContextCancel(t *testing.T) {
 	}
 }
 
+func TestDo_ZeroAttempts(t *testing.T) {
+	ctx := context.Background()
+	err := Do(ctx, 0, 1*time.Millisecond, 10*time.Millisecond, 2.0, func() error {
+		return errors.New("fail")
+	})
+	if err == nil {
+		t.Fatal("expected error for zero attempts, got nil")
+	}
+}
+
+func TestDo_SingleAttempt(t *testing.T) {
+	ctx := context.Background()
+	attempts := 0
+	err := Do(ctx, 1, 1*time.Millisecond, 10*time.Millisecond, 2.0, func() error {
+		attempts++
+		return errors.New("fail")
+	})
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+	if attempts != 1 {
+		t.Errorf("expected 1 attempt, got %d", attempts)
+	}
+}
+
+func TestDo_BackoffFactorZero(t *testing.T) {
+	ctx := context.Background()
+	// With backoffFactor=0, all delays become 0 (value after jitter of 0 is 0).
+	// The function still retries; it just doesn't sleep between attempts.
+	start := time.Now()
+	attempts := 0
+	_ = Do(ctx, 3, 1*time.Millisecond, 10*time.Millisecond, 0.0, func() error {
+		attempts++
+		return errors.New("fail")
+	})
+	elapsed := time.Since(start)
+	if attempts != 3 {
+		t.Errorf("expected 3 attempts, got %d", attempts)
+	}
+	// Should be very fast since all delays jitter to 0.
+	if elapsed > 50*time.Millisecond {
+		t.Errorf("took too long (%v) with zero backoff", elapsed)
+	}
+}
+
+func TestDo_ContextCancelDuringSleep(t *testing.T) {
+	// Use a deadline that fires during the sleep phase to guarantee
+	// the context-cancellation branch in the sleep select is covered.
+	// fn fails immediately, then a 1s delay is calculated, but the
+	// 10ms deadline expires first — so ctx.Done() is the only ready channel.
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
+	defer cancel()
+
+	err := Do(ctx, 3, 1*time.Second, 5*time.Second, 2.0, func() error {
+		return errors.New("fail")
+	})
+	if !errors.Is(err, context.DeadlineExceeded) {
+		t.Errorf("expected context.DeadlineExceeded, got %v", err)
+	}
+}
+
 func TestDo_MaxDelay(t *testing.T) {
 	ctx := context.Background()
 	start := time.Now()

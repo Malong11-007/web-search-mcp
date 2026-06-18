@@ -21,7 +21,9 @@ const (
 )
 
 // Job holds the state of an asynchronous operation.
+// mu protects all mutable fields.
 type Job struct {
+	mu        sync.Mutex
 	ID        string    `json:"id"`
 	Status    Status    `json:"status"`
 	Progress  string    `json:"progress,omitempty"`
@@ -68,10 +70,14 @@ func (m *Manager) Start(progress string, fn func(job *Job)) *Job {
 	m.mu.Unlock()
 
 	go func() {
+		job.mu.Lock()
 		job.Status = StatusRunning
 		job.UpdatedAt = time.Now()
+		job.mu.Unlock()
 		fn(job)
+		job.mu.Lock()
 		job.UpdatedAt = time.Now()
+		job.mu.Unlock()
 	}()
 
 	return job
@@ -130,6 +136,8 @@ func (m *Manager) reap() {
 
 // ResultJSON marshals result data to JSON and stores it in the job.
 func ResultJSON(job *Job, data any) {
+	job.mu.Lock()
+	defer job.mu.Unlock()
 	b, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
 		job.Status = StatusFailed
@@ -142,12 +150,16 @@ func ResultJSON(job *Job, data any) {
 
 // ResultText stores a text result in the job.
 func ResultText(job *Job, text string) {
+	job.mu.Lock()
+	defer job.mu.Unlock()
 	job.Status = StatusCompleted
 	job.Result = text
 }
 
 // Fail marks the job as failed.
 func Fail(job *Job, err error) {
+	job.mu.Lock()
+	defer job.mu.Unlock()
 	job.Status = StatusFailed
 	job.Error = err.Error()
 }

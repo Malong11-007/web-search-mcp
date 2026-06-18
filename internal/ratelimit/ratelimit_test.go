@@ -68,6 +68,66 @@ func TestLimiter_Wait(t *testing.T) {
 	}
 }
 
+func TestNewNoop(t *testing.T) {
+	l := NewNoop()
+	ctx := context.Background()
+
+	// Noop provides exactly one token — it never blocks on the first call.
+	if err := l.Wait(ctx); err != nil {
+		t.Fatalf("Wait on Noop limiter: %v", err)
+	}
+	// Close should not panic.
+	l.Close()
+}
+
+func TestClose(t *testing.T) {
+	l, err := New("1/1h")
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	l.Close()
+	// Second Close should not panic (idempotent).
+	l.Close()
+	// ticker should be nil or stopped; no goroutine leaks.
+}
+
+func TestParseRate_DurationError(t *testing.T) {
+	// Rate with valid count but unparseable duration.
+	_, _, err := parseRate("10/xyz")
+	if err == nil {
+		t.Error("parseRate('10/xyz') expected error for bad duration, got nil")
+	}
+}
+
+func TestParseRate_EmptyDurationPart(t *testing.T) {
+	// Slash present but nothing after it.
+	_, _, err := parseRate("5/")
+	if err == nil {
+		t.Error("parseRate('5/') expected error for empty duration, got nil")
+	}
+}
+
+func TestNew_FastRate(t *testing.T) {
+	// Extremely fast rate causes refill interval to be clamped at 1ms.
+	l, err := New("1000/1ms") // 1000 tokens per ms → interval = 1µs, clamped to 1ms
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	defer l.Close()
+	// Should not block on first token.
+	if err := l.Wait(context.Background()); err != nil {
+		t.Errorf("Wait: %v", err)
+	}
+}
+
+func TestParseRate_BareNumber(t *testing.T) {
+	// A bare number without a slash or unit should fail.
+	_, _, err := parseRate("100")
+	if err == nil {
+		t.Error("parseRate('100') expected error for bare number, got nil")
+	}
+}
+
 func TestLimiter_ContextCancel(t *testing.T) {
 	l, err := New("1/1h") // Very slow refill.
 	if err != nil {
