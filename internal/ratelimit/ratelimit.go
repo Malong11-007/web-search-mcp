@@ -68,6 +68,15 @@ func (l *Limiter) Wait(ctx context.Context) error {
 	}
 }
 
+// MustNew is like New but panics if the rate string is invalid.
+func MustNew(rate string) *Limiter {
+	l, err := New(rate)
+	if err != nil {
+		panic(err)
+	}
+	return l
+}
+
 // NewNoop returns a Limiter that never blocks — useful for testing.
 func NewNoop() *Limiter {
 	l := &Limiter{

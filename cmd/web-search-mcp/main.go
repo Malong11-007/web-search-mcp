@@ -20,11 +20,14 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 )
 
+// osExit is a test hook that can be overridden in tests.
+var osExit = os.Exit
+
 func main() {
 	// Handle --version / -v before starting the server.
 	if len(os.Args) > 1 && (os.Args[1] == "--version" || os.Args[1] == "-v") {
 		fmt.Println(version.String())
-		os.Exit(0)
+		osExit(0)
 	}
 
 	cfg := config.Load()
@@ -118,7 +121,7 @@ func registerFeedbackTool(s *server.MCPServer) {
 func runStdio(s *server.MCPServer) {
 	if err := server.ServeStdio(s); err != nil {
 		fmt.Fprintf(os.Stderr, "server error: %v\n", err)
-		os.Exit(1)
+		osExit(1)
 	}
 }
 
@@ -151,6 +154,6 @@ func runHTTP(s *server.MCPServer, cfg *config.Config) {
 	log.Printf("MCP server listening on http://localhost%s/sse", addr)
 	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
 		fmt.Fprintf(os.Stderr, "server error: %v\n", err)
-		os.Exit(1)
+		osExit(1)
 	}
 }
