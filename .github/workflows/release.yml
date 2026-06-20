@@ -9,11 +9,11 @@ permissions:
 
 jobs:
   release:
-    name: Build and release
+    name: Build and release (${{ matrix.goos }}, ${{ matrix.goarch }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        goos: [darwin, linux]
+        goos: [darwin, linux, windows]
         goarch: [amd64, arm64]
     steps:
       - uses: actions/checkout@v4
@@ -33,18 +33,27 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: |
+          BINARY="web-search-mcp"
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            BINARY="web-search-mcp.exe"
+          fi
           go build \
             -ldflags "-s -w \
               -X github.com/Malong11-007/web-search-mcp/internal/version.Version=v$VERSION \
               -X github.com/Malong11-007/web-search-mcp/internal/version.Commit=$COMMIT \
               -X github.com/Malong11-007/web-search-mcp/internal/version.BuildDate=$BUILD_DATE" \
-            -o web-search-mcp \
+            -o "$BINARY" \
             ./cmd/web-search-mcp/
 
       - name: Package
         run: |
-          ARCHIVE="web-search-mcp_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz"
-          tar -czf "$ARCHIVE" web-search-mcp
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            ARCHIVE="web-search-mcp_${{ matrix.goos }}_${{ matrix.goarch }}.zip"
+            zip "$ARCHIVE" web-search-mcp.exe
+          else
+            ARCHIVE="web-search-mcp_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz"
+            tar -czf "$ARCHIVE" web-search-mcp
+          fi
           sha256sum "$ARCHIVE" > "$ARCHIVE.sha256"
           echo "ARCHIVE=$ARCHIVE" >> "$GITHUB_ENV"
 
@@ -52,13 +61,13 @@ jobs:
         with:
           name: web-search-mcp_${{ matrix.goos }}_${{ matrix.goarch }}
           path: |
-            web-search-mcp_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz
-            web-search-mcp_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz.sha256
+            web-search-mcp_${{ matrix.goos }}_${{ matrix.goarch }}.*
+            web-search-mcp_${{ matrix.goos }}_${{ matrix.goarch }}.*.sha256
 
       - name: Upload to release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            web-search-mcp_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz
-            web-search-mcp_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz.sha256
+            web-search-mcp_${{ matrix.goos }}_${{ matrix.goarch }}.*
+            web-search-mcp_${{ matrix.goos }}_${{ matrix.goarch }}.*.sha256
           generate_release_notes: true
