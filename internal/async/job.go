@@ -128,7 +128,10 @@ func (m *Manager) reap() {
 	defer m.mu.Unlock()
 	cutoff := time.Now().Add(-m.ttl)
 	for id, job := range m.jobs {
-		if job.UpdatedAt.Before(cutoff) {
+		job.mu.Lock()
+		updatedAt := job.UpdatedAt
+		job.mu.Unlock()
+		if updatedAt.Before(cutoff) {
 			delete(m.jobs, id)
 		}
 	}

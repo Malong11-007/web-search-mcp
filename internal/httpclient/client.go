@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
+	"sync"
 	"time"
 
 	"github.com/Malong11-007/web-search-mcp/internal/config"
@@ -18,7 +19,9 @@ import (
 //   - Configurable timeout and size cap
 //
 // Set STEALTH_MODE=false to disable browser-like behavior and use a static UA.
+// Client is safe for concurrent use.
 type Client struct {
+	mu          sync.Mutex
 	http        *http.Client
 	cfg         *config.Config
 	ua          string       // static UA, or empty to rotate
@@ -66,7 +69,9 @@ func (c *Client) GetSimple(targetURL string) (*http.Response, error) {
 		ua = rotateUA()
 	}
 	req.Header.Set("User-Agent", ua)
+	c.mu.Lock()
 	c.lastURL = targetURL
+	c.mu.Unlock()
 	return c.http.Do(req)
 }
 
@@ -78,7 +83,9 @@ func (c *Client) Get(targetURL string) (*http.Response, error) {
 		return nil, err
 	}
 	c.setHeaders(req, targetURL)
+	c.mu.Lock()
 	c.lastURL = targetURL
+	c.mu.Unlock()
 	return c.http.Do(req)
 }
 
@@ -97,7 +104,9 @@ func (c *Client) GetBody(targetURL string) ([]byte, error) {
 // Do sends the given request after adding stealth headers.
 func (c *Client) Do(req *http.Request) (*http.Response, error) {
 	c.setHeaders(req, req.URL.String())
+	c.mu.Lock()
 	c.lastURL = req.URL.String()
+	c.mu.Unlock()
 	return c.http.Do(req)
 }
 
@@ -108,6 +117,8 @@ func (c *Client) Timeout() time.Duration {
 
 // LastURL returns the most recently requested URL (for referrer tracking).
 func (c *Client) LastURL() string {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	return c.lastURL
 }
 
@@ -126,13 +137,13 @@ func (c *Client) setHeaders(req *http.Request, targetURL string) {
 		for k, v := range browserHeaders(ua) {
 			req.Header.Set(k, v)
 		}
-		// Set referrer from last URL.
-		if c.lastURL != "" {
-			req.Header.Set("Referer", c.lastURL)
-		}
-		// Set Sec-Fetch-Site based on whether this is same-origin.
-		if c.lastURL != "" {
-			lastParsed, _ := url.Parse(c.lastURL)
+		// Snapshot lastURL under lock for safe concurrent access.
+		c.mu.Lock()
+		lastURL := c.lastURL
+		c.mu.Unlock()
+		if lastURL != "" {
+			req.Header.Set("Referer", lastURL)
+			lastParsed, _ := url.Parse(lastURL)
 			thisParsed, _ := url.Parse(targetURL)
 			if lastParsed != nil && thisParsed != nil && lastParsed.Host == thisParsed.Host {
 				req.Header.Set("Sec-Fetch-Site", "same-origin")
