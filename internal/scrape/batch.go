@@ -35,6 +35,8 @@ func RegisterBatchTool(s *server.MCPServer, cfg *config.Config) {
 		mcp.WithArray("urls",
 			mcp.Required(),
 			mcp.Description("List of full URLs to scrape (max 20). All must be valid, reachable URLs with https://."),
+			mcp.Items(map[string]any{"type": "string"}),
+			mcp.MaxItems(20),
 		),
 		mcp.WithString("format",
 			mcp.Description("Output format for all pages. \"markdown\" gives formatted content, \"text\" is plain text, \"json\" is structured."),

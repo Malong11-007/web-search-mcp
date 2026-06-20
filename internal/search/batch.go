@@ -29,6 +29,8 @@ func RegisterBatchTool(s *server.MCPServer, cfg *config.Config) {
 		mcp.WithArray("queries",
 			mcp.Required(),
 			mcp.Description("List of search query strings to run in parallel (max 10). Each query runs independently and may hit different backends."),
+			mcp.Items(map[string]any{"type": "string"}),
+			mcp.MaxItems(10),
 		),
 		mcp.WithNumber("num_results",
 			mcp.Description("Results per query (default 5, max 10). Keep low for broad comparison, raise if each query needs deeper coverage."),
