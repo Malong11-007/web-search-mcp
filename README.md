@@ -28,11 +28,7 @@ go install github.com/Malong11-007/web-search-mcp/cmd/web-search-mcp@latest
 curl -fsSL https://raw.githubusercontent.com/Malong11-007/web-search-mcp/main/install.sh | bash
 ```
 
-### Option 3: Manual download
-
-Download the binary for your platform from [GitHub Releases](https://github.com/Malong11-007/web-search-mcp/releases) and put it in your PATH.
-
-### Option 4: Build from source
+### Option 3: Build from source
 
 ```bash
 git clone git@github.com:Malong11-007/web-search-mcp.git
